@@ -16,11 +16,11 @@ class DailyReport(db.Model):
     incident = db.Column(db.Boolean, default=False)
     notes = db.Column(db.Text)
     checker_signature = db.Column(db.String(100))
+    alcohol_check = db.Column(db.Boolean, default=False)  
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 with app.app_context():
     db.create_all()
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -33,11 +33,13 @@ def index():
             mileage=request.form['mileage'],
             incident='incident' in request.form,
             notes=request.form['notes'],
-            checker_signature=request.form['checker_signature']
+            checker_signature=request.form['checker_signature'],
+            alcohol_check=True if request.form.get('alcohol_check') == 'on' else False 
         )
         db.session.add(report)
         db.session.commit()
         return redirect('/')
+
     reports = DailyReport.query.order_by(DailyReport.created_at.desc()).all()
     return render_template('index.html', reports=reports)
 
